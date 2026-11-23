@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Attendify - Admin</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="topbar">
+  <a class="brand" href="admin.html"><div class="brand-mark">⚙</div><div>Attendify<small>Panel admin</small></div></a>
+  <nav class="nav"><a href="siswa.html">Halaman siswa</a><a class="active" href="admin.html">Dashboard admin</a></nav>
+</header>
+
+<main class="wrap">
+  <section id="loginArea">
+    <div class="login-split">
+      <div class="login-art"><h1>Pantau kehadiran satu kelas dalam sekali lihat.</h1><p>Masuk untuk melihat siapa yang hadir, izin, sakit, atau belum absen.</p></div>
+      <div class="login-form">
+        <h2>Masuk sebagai admin</h2>
+        <div class="field"><label for="adminPassword">Kata sandi</label><input type="password" id="adminPassword" placeholder="Masukkan kata sandi" autocomplete="current-password"></div>
+        <button class="btn btn-blue" id="loginBtn">Buka dashboard</button>
+        <div class="notice" style="margin:0">Kata sandi disimpan di database (tabel admin_config). Lihat setup.sql.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="admin-hero">
+      <div><h1>Data kehadiran siswa</h1><p id="dateLabel"></p></div>
+      <div class="date-box"><div class="field"><label for="filterDate">Pilih tanggal</label><input type="date" id="filterDate"></div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat green"><span class="ico">✅</span><span>Hadir</span><strong id="totalHadir">0</strong><small id="pctHadir"></small></div>
+      <div class="stat orange"><span class="ico">📝</span><span>Izin</span><strong id="totalIzin">0</strong><small>siswa</small></div>
+      <div class="stat red"><span class="ico">🤒</span><span>Sakit</span><strong id="totalSakit">0</strong><small>siswa</small></div>
+      <div class="stat blue"><span class="ico">⏳</span><span>Belum absen</span><strong id="totalAlpa">0</strong><small>dari <b id="totalRoster">0</b> siswa terdaftar</small></div>
+    </div>
+
+    <div class="charts">
+      <div class="card"><h2>Komposisi hari ini</h2><p class="card-sub">Perbandingan status seluruh siswa terdaftar.</p>
+        <div class="donut-wrap"><div class="donut"><svg viewBox="0 0 100 100" id="donutSvg"></svg><div class="donut-center"><b id="donutPct">0%</b><span>hadir</span></div></div>
+          <div class="donut-legend"><div><i style="background:var(--mint)"></i>Hadir</div><div><i style="background:var(--sun)"></i>Izin</div><div><i style="background:var(--coral)"></i>Sakit</div><div><i style="background:#c5d2e3"></i>Belum absen</div></div></div></div>
+      <div class="card"><h2>Kehadiran 7 hari terakhir</h2><p class="card-sub">Ketuk batang untuk berpindah ke tanggal itu.</p><div class="bars" id="bars"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar"><div><h2>Daftar kehadiran</h2><p class="card-sub" style="margin:0" id="countLabel"></p></div>
+        <div class="chips" id="statusChips"><button class="chip on" data-f="">Semua</button><button class="chip" data-f="Hadir">Hadir</button><button class="chip" data-f="Izin">Izin</button><button class="chip" data-f="Sakit">Sakit</button><button class="chip" data-f="Belum Absen">Belum absen</button></div></div>
+      <div class="toolbar-admin">
+        <div class="field"><label for="searchInput">Cari nama</label><input id="searchInput" placeholder="Ketik nama siswa..."></div>
+        <div class="field"><label for="classFilter">Kelas</label><select id="classFilter"><option value="">Semua kelas</option></select></div>
+        <button class="btn btn-blue" id="exportBtn">Unduh CSV</button>
+        <button class="btn btn-ghost" id="printBtn">Cetak</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>No.</th><th>Nama siswa</th><th>Kelas</th><th>Status</th><th>Waktu</th><th>Keterangan</th><th class="act-col">Ubah status</th></tr></thead><tbody id="adminBody"></tbody></table></div>
+      <div class="notice" id="weekendNote" hidden>Tanggal ini jatuh pada akhir pekan, jadi status "Belum absen" belum tentu berarti siswa tidak hadir.</div>
+      <div class="actions" style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn btn-light btn-sm" id="logoutBtn">Keluar</button></div>
+    </div>
+
+    <details class="card" style="margin-top:18px">
+      <summary>Kelola daftar siswa</summary>
+      <p class="card-sub" style="margin-top:6px">Tambahkan siswa agar yang belum mengisi absensi ikut terhitung. Siswa yang pernah absen otomatis masuk daftar.</p>
+      <div class="roster-grid">
+        <div><div class="field"><label for="rName">Nama siswa</label><input id="rName" placeholder="Contoh: Budi Santoso"></div>
+          <div class="field" style="margin-top:12px"><label for="rClass">Kelas</label><input id="rClass" placeholder="Contoh: X PPLG 2"></div>
+          <button class="btn btn-blue" id="addOne" style="margin-top:14px">Tambah siswa</button></div>
+        <div><div class="field"><label for="rBulk">Tempel banyak siswa (satu per baris: Nama, Kelas)</label><textarea id="rBulk" placeholder="Budi Santoso, X PPLG 2&#10;Siti Aisyah, X PPLG 2"></textarea></div>
+          <button class="btn btn-sun" id="addBulk" style="margin-top:14px">Tambah semua</button></div>
+      </div>
+      <div class="danger"><span class="muted" id="rosterInfo"></span><button class="btn btn-coral btn-sm" id="resetAll">Hapus semua data</button></div>
+    </details>
+  </section>
+</main>
+<div class="footer">© 2026 Attendify · Panel admin</div>
+<script src="config.js"></script><script src="core.js"></script><script src="admin.js"></script></body></html>

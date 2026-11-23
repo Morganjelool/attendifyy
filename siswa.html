@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Attendify - Siswa</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="topbar">
+  <a class="brand" href="siswa.html"><div class="brand-mark">✓</div><div>Attendify<small>Portal absensi siswa</small></div></a>
+  <nav class="nav"><a class="active" href="siswa.html">Beranda</a><a href="#kalender">Kalender</a><a href="#riwayat">Riwayat</a><a href="admin.html">Admin</a></nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="hero-kicker" id="todayText"></p>
+      <h1 id="heroTitle">Selamat datang!</h1>
+      <p class="hero-sub" id="heroSub">Isi nama dan kelasmu, lalu catat kehadiran hari ini dengan satu ketukan.</p>
+    </div>
+    <div class="clock-card">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="clock-label">Waktu sekarang (WIB)</div>
+      <div class="streak-badge">🔥 <b id="streakNum">0</b> hari hadir beruntun</div>
+    </div>
+  </section>
+
+  <section class="layout">
+    <div class="card" id="absensi">
+      <h2>Presensi hari ini</h2>
+      <p class="card-sub">Pastikan nama dan kelas sudah benar. Datamu diingat di browser ini.</p>
+      <div class="two">
+        <div class="field"><label for="studentName">Nama lengkap</label><input id="studentName" placeholder="Contoh: Aulia Rahma" autocomplete="name"></div>
+        <div class="field"><label for="studentClass">Kelas</label><input id="studentClass" placeholder="Contoh: X PPLG 2"></div>
+      </div>
+      <div class="today-area">
+        <div class="today-head">
+          <div class="avatar" id="avatar">?</div>
+          <div><h3 id="greetingName">Siswa</h3><div class="muted" id="greetingClass">Kelas belum diisi</div></div>
+        </div>
+        <div id="actionBox" class="big-actions">
+          <button class="btn btn-green" id="presentBtn">✓ Saya hadir</button>
+          <button class="btn btn-coral" id="requestBtn">Izin / sakit</button>
+        </div>
+        <div id="stampBox" class="stamp-box hidden">
+          <div class="stamp" id="stamp"><b id="stampText">HADIR</b><span id="stampTime"></span></div>
+          <div class="stamp-note"><span id="stampMsg">Absensi tercatat.</span><small>Absensi hanya bisa diisi sekali per hari.</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Kehadiranmu</h2>
+      <div class="ring-wrap">
+        <div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="bar" id="ringBar" cx="60" cy="60" r="52"/></svg>
+          <div class="ring-text"><b id="ringPct">0%</b><span>hadir</span></div></div>
+        <div class="ring-msg" id="ringMsg">Mulai absen untuk melihat progresmu.</div>
+      </div>
+      <div class="mini">
+        <div class="m-hadir">Hadir<strong id="countHadir">0</strong></div>
+        <div class="m-izin">Izin<strong id="countIzin">0</strong></div>
+        <div class="m-sakit">Sakit<strong id="countSakit">0</strong></div>
+        <div class="m-total">Total<strong id="countTotal">0</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <div class="card" id="kalender">
+      <div class="cal-top">
+        <div><h2>Kalender kehadiran</h2><p class="card-sub" style="margin:0">Lihat pola absensimu bulan demi bulan.</p></div>
+        <div class="cal-nav"><button class="btn btn-ghost btn-sm" id="prevMonth" aria-label="Bulan sebelumnya">‹</button><strong id="calTitle"></strong><button class="btn btn-ghost btn-sm" id="nextMonth" aria-label="Bulan berikutnya">›</button></div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend"><span><i style="background:var(--mint)"></i>Hadir</span><span><i style="background:var(--sun)"></i>Izin</span><span><i style="background:var(--coral)"></i>Sakit</span><span><i style="background:var(--slate-bg)"></i>Belum ada data</span></div>
+    </div>
+
+    <div class="card" id="riwayat">
+      <div class="toolbar"><div><h2>Riwayat absensi saya</h2><p class="card-sub" style="margin:0">Tersimpan di browser ini.</p></div>
+        <div class="chips" id="histChips"><button class="chip on" data-f="">Semua</button><button class="chip" data-f="Hadir">Hadir</button><button class="chip" data-f="Izin">Izin</button><button class="chip" data-f="Sakit">Sakit</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Nama</th><th>Kelas</th><th>Status</th><th>Waktu</th><th>Keterangan</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+    </div>
+  </section>
+</main>
+<div class="footer">© 2026 Attendify · Portal absensi siswa</div>
+
+<div class="modal-backdrop hidden" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal">
+  <h2 id="modalTitle">Ajukan izin atau sakit</h2>
+  <div class="field"><label for="requestType">Status</label><select id="requestType"><option value="Izin">Izin</option><option value="Sakit">Sakit</option></select></div>
+  <div class="field"><label for="requestNote">Keterangan</label><input id="requestNote" placeholder="Contoh: Ada keperluan keluarga">
+    <div class="chips" id="noteChips" style="margin-top:6px"><button class="chip" type="button">Keperluan keluarga</button><button class="chip" type="button">Demam</button><button class="chip" type="button">Periksa ke dokter</button></div></div>
+  <div class="actions"><button class="btn btn-blue" id="submitRequest">Kirim pengajuan</button><button class="btn btn-light" id="closeModal">Batal</button></div>
+</div></div>
+<script src="config.js"></script><script src="core.js"></script><script src="siswa.js"></script></body></html>
