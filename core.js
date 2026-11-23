@@ -43,3 +43,13 @@ async function rpc(fn,args={}){
   const t=await r.text();if(!r.ok)throw new Error(t||r.statusText);return t?JSON.parse(t):null;
 }
 const fromDb=r=>({id:r.id,date:r.date,time:r.time,name:r.name,kelas:r.kelas,status:r.status,note:r.note||''});
+
+/* ===== 1 perangkat = 1 siswa ===== */
+const DEVICE_KEY='attendify_device_v1', BIND_KEY='attendify_bound_v1';
+function deviceId(){
+  try{
+    let v=localStorage.getItem(DEVICE_KEY);
+    if(!v){v=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_KEY,v)}
+    return v;
+  }catch{return 'tmp-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)}
+}

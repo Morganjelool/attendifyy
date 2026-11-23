@@ -71,14 +71,21 @@ async function submit(status,note=''){
   try{
     let rec;
     if(DB_ON()){
-      try{rec=fromDb(await rpc('student_submit',{p_name:s.name,p_kelas:s.kelas,p_status:status,p_note:note}))}
-      catch(e){const dup=String(e.message).includes('DUPLICATE');toast(dup?'Kamu sudah mengisi absensi hari ini.':'Gagal terhubung ke server. Coba lagi.','err');if(dup)await syncMine();return false}
+      try{rec=fromDb(await rpc('student_submit',{p_name:s.name,p_kelas:s.kelas,p_status:status,p_note:note,p_device:deviceId()}))}
+      catch(e){
+        const m=String(e.message),dup=m.includes('DUPLICATE'),lock=m.includes('DEVICE_LOCKED');
+        toast(lock?'Perangkat ini sudah dipakai untuk siswa lain. Satu perangkat hanya untuk satu siswa.':dup?'Kamu sudah mengisi absensi hari ini.':'Gagal terhubung ke server. Coba lagi.','err');
+        if(dup)await syncMine();
+        if(lock)await loadBinding();
+        return false;
+      }
     }else{
       if(getRecords().some(r=>r.date===today()&&same(r,s))){toast('Kamu sudah mengisi absensi hari ini.','err');return false}
       rec={id:Date.now(),date:today(),time:timeNow(),name:s.name,kelas:s.kelas,status,note};
     }
     const all=getRecords().filter(r=>!(r.date===rec.date&&same(r,rec)));all.push(rec);
     if(!saveRecords(all))return false;
+    write(BIND_KEY,{name:rec.name,kelas:rec.kelas});lockInputs();
     refresh();
     if(status==='Hadir'){confetti();toast('Hadir tercatat. Selamat belajar!','ok')}else toast(`Pengajuan ${status.toLowerCase()} berhasil dikirim.`,'ok');
     return true;
@@ -93,6 +100,20 @@ async function syncMine(){
 const onProf=()=>{saveProfile();refresh();clearTimeout(syncT);syncT=setTimeout(syncMine,600)};
 
 function saveProfile(){write(PROFILE_KEY,me())}
+
+/* ===== 1 perangkat = 1 siswa ===== */
+function lockInputs(){
+  const b=read(BIND_KEY,null);if(!b)return;
+  $('studentName').value=b.name;$('studentClass').value=b.kelas;
+  $('studentName').disabled=true;$('studentClass').disabled=true;
+  saveProfile();refresh();
+}
+async function loadBinding(){
+  if(!DB_ON())return;
+  try{const r=await rpc('student_device',{p_device:deviceId()});
+    if(r&&r[0]){write(BIND_KEY,{name:r[0].name,kelas:r[0].kelas});lockInputs();syncMine()}}catch(e){}
+}
+
 const openModal=()=>{$('requestModal').classList.remove('hidden');$('requestNote').focus()};
 const closeModal=()=>$('requestModal').classList.add('hidden');
 
@@ -111,3 +132,4 @@ window.addEventListener('storage',refresh);
 
 const prof=read(PROFILE_KEY,{});$('studentName').value=prof.name||'';$('studentClass').value=prof.kelas||'';
 tick();setInterval(tick,1000);refresh();syncMine();setInterval(syncMine,20000);
+lockInputs();loadBinding();
